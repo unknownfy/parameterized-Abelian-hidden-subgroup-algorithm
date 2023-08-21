@@ -1,0 +1,287 @@
+function output  = ccircuit(bitprob,s,l)
+%   This function computes information from quantum circuit and output cost
+%   of linear congruences
+%   This function has 3 required arguments:
+%      bitprob: probability distribution of measured bit
+%      s: parameters from quantum circuit that control the group structure
+%      l: all parameters 
+%   output  = ccircuit(bitprob,s,l) gives the secret bit string from given
+%   data string, to do that we solve the linear congruences in training
+%   way,
+
+
+
+%%%%%%take information from encoder and bottleneck%%%%%%%
+rsuper(1) = l(13);
+rsuper(2) = l(14);
+rsuper(3) = l(15);
+
+
+s1 = probdis(s(1));
+s2 = probdis(s(2));
+s3 = probdis(s(3));
+
+sdistribution = kron(kron(s1,s2),s3);
+
+rinteger(1) = round(sin(rsuper(1)*pi/2)^2);
+rinteger(2) = round(sin(rsuper(2)*pi/2)^2);
+rinteger(3) = round(sin(rsuper(3)*pi/2)^2);
+
+%%%%%%%set all possible group structure in advance%%%%%
+%here we choose s=000 and s=111 as example
+if rinteger(1)==0 && rinteger(2)==1 && rinteger(3)==0
+    %rinteger = [0 1 0];
+    rinteger = [0 0 0];
+end
+
+if rinteger(1)==1 && rinteger(2)==0 && rinteger(3)==0
+    %rinteger = [0 1 0];
+    rinteger = [0 0 0];
+end
+
+if rinteger(1)==0 && rinteger(2)==0 && rinteger(3)==1
+    %rinteger = [0 1 0];
+    rinteger = [0 0 0];
+end
+
+
+
+if rinteger(1)==0 && rinteger(2)==1 && rinteger(3)==1
+    %rinteger = [0 1 0];
+    rinteger = [1 1 1];
+end
+
+if rinteger(1)==1 && rinteger(2)==0 && rinteger(3)==1
+    %rinteger = [1 0 0];
+    rinteger = [1 1 1];
+end
+
+if rinteger(1)==1 && rinteger(2)==1 && rinteger(3)==0
+    rinteger = [1 1 1];
+end
+%%%%%%%%%%find s%%%%%%%%%%
+%% d=2
+% d = 2;
+% %[m,n,b] = size(bitstring);
+% for i = 1:1:3
+%     dis(i,:) = probdis(s(i));
+% end
+% 
+% % for i = 2:1:8
+% %     sbinary = dec2bin(i-1,3)-'0';
+% %     y1 = unique(bitstring(:,:,1),'row');
+% %     output1 = sin(y1*sbinary'*pi/d).^2;
+% %     y2 = unique(bitstring(:,:,2),'row');
+% %     output2 = sin(y2*sbinary'*pi/d).^2;
+% %     y3 = unique(bitstring(:,:,3),'row');
+% %     output3 = sin(y3*sbinary'*pi/d).^2;
+% %     y4 = unique(bitstring(:,:,4),'row');
+% %     output4 = sin(y4*sbinary'*pi/d).^2;
+% %     
+% %     Lengthofoutput = max([length(output1),length(output2),length(output3),length(output4)]);
+% %     output_temp(:,:,i) = zeros(Lengthofoutput,4);
+% %     output_temp(1:length(output1),1,i) = output1;
+% %     output_temp(1:length(output2),2,i) = output2;
+% %     output_temp(1:length(output3),3,i) = output3;
+% %     output_temp(1:length(output4),4,i) = output4;
+% %     %[size_x,size_y] = size(y);
+% % end
+% 
+% 
+% % for i = 2:1:8
+% %     sbinary = dec2bin(i-1,3)-'0';
+% %     output_temp(:,:,i) = zeros(m,4);
+% %     for  j =1:1:4
+% %         output(:,j) = sin(bitstring(:,:,j)*sbinary'*pi/d).^2;
+% %         output_temp(:,j,i) = output(:,j);
+% %     end
+% % end
+% output_temp = zeros(8,4,8);
+% for i = 2:1:8
+%     sbinary = dec2bin(i-1,3)-'0';
+%     for k = 1:1:4
+%         for j = 1:1:8           
+%             ybinary = dec2bin(j-1,3)-'0';
+%             output_temp(j,k,i) = bitprob(j,k)*sin(ybinary*sbinary'*pi/d).^2;
+%         end
+%     end
+% end
+% 
+% 
+% output = zeros(8,4,8);
+% 
+% for i = 2:1:8
+%     sbinary = dec2bin(i-1,3)-'0';
+%     output(:,:,i) = output(:,:,i)+output_temp(:,:,i)*dis(1,sbinary(1)+1)*dis(2,sbinary(2)+1)*dis(3,sbinary(3)+1); 
+% end
+%% s = 000
+if rinteger(1)==0 && rinteger(2)==0 && rinteger(3)==0
+    d = 2;
+    for i = 1:1:3
+        dis(i,:) = probdis(s(i));
+    end
+    output_temp = zeros(8,4,8);
+    output = zeros(8,4,8);
+    
+    for i = 2:1:8
+        sbase = dec2base(i-1,d,ceil(log(8)/log(d)))-'0';
+        %    sbinary = dec2bin(i-1,3)-'0';
+        %    sbaseprob = 1;
+        for k = 1:1:4
+            for j = 1:1:8
+                ybase = dec2base(j-1,d,ceil(log(8)/log(d)))-'0';
+                output_temp(j,k,i) = bitprob(j,k)*sin(ybase*sbase'*pi/d).^2;
+            end
+        end
+        %     for n = 1:1:3
+        %         sbaseprob = sbaseprob*dis(n,sbinary(n)+1);
+        %     end
+        %     output(:,:,i) = output(:,:,i)+output_temp(:,:,i)*sbaseprob;
+    end
+    
+    for i = 2:1:8
+        sbinary = dec2bin(i-1,3)-'0';
+        output(:,:,i) = output(:,:,i)+output_temp(:,:,i)*dis(1,sbinary(1)+1)*dis(2,sbinary(2)+1)*dis(3,sbinary(3)+1);
+    end
+end
+%% s = 111
+if rinteger(1)==1 && rinteger(2)==1 && rinteger(3)==1
+    d = 8;
+    for i = 1:1:3
+        dis(i,:) = probdis(s(i));
+    end
+    output_temp = zeros(8,4,8);
+    output = zeros(8,4,8);
+    
+    for i = 2:1:8
+        sbase = dec2base(i-1,d,ceil(log(8)/log(d)))-'0';
+        %    sbinary = dec2bin(i-1,3)-'0';
+        %    sbaseprob = 1;
+        for k = 1:1:4
+            for j = 1:1:8
+                ybase = dec2base(j-1,d,ceil(log(8)/log(d)))-'0';
+                output_temp(j,k,i) = bitprob(j,k)*sin(ybase*sbase'*pi/d).^2;
+            end
+        end
+        %     for n = 1:1:3
+        %         sbaseprob = sbaseprob*dis(n,sbinary(n)+1);
+        %     end
+        %     output(:,:,i) = output(:,:,i)+output_temp(:,:,i)*sbaseprob;
+    end
+    
+    for i = 2:1:8
+        sbinary = dec2bin(i-1,3)-'0';
+        output(:,:,i) = output(:,:,i)+output_temp(:,:,i)*dis(1,sbinary(1)+1)*dis(2,sbinary(2)+1)*dis(3,sbinary(3)+1);
+    end
+end
+
+%%
+rsuper = l(1:6);
+
+
+s1 = probdis(s(1));
+s2 = probdis(s(2));
+s3 = probdis(s(3));
+
+
+n = 3;
+
+sdistribution = kron(kron(s1,s2),s3);                                                                                                    
+
+for i = 1:1:3
+rinteger(i) = round(sin(rsuper(i))^2);
+end
+%%%%%%%set all possible group structure in advance%%%%%
+rdec = bin2dec(num2str(rinteger));
+initialpoint = 1;
+breakpoint{initialpoint,1} = bin2dec('000000');%2 2 2 2 
+breakpoint{initialpoint,2} = [2 2 2 2];
+breakpoint{initialpoint+1,1} = bin2dec('000001');% 2 2 4
+breakpoint{initialpoint+1,2} =[2 2 4];
+breakpoint{initialpoint+2,1} = bin2dec('000100');% 2 4 2 
+breakpoint{initialpoint+2,2} = [2 4 2];
+breakpoint{initialpoint+3,1} = bin2dec('000111');%2 8
+breakpoint{initialpoint+3,2} = [2 8];
+breakpoint{initialpoint+4,1} = bin2dec('100000');%4 2 2
+breakpoint{initialpoint+4,2} = [4 2 2]; 
+breakpoint{initialpoint+5,1} = bin2dec('111000');%8 2
+breakpoint{initialpoint+5,2} = [8 2];
+breakpoint{initialpoint+6,1} = bin2dec('111111');%16
+breakpoint{initialpoint+6,2} = [16];
+
+%%%%set breakpoint to distinguish which group structure it belongs to%%%%
+
+[lengthofbreak,breakpoint_y] = size(breakpoint);
+for i = 1:1:lengthofbreak-1
+   midpiontofbreak(i) =  round((breakpoint{i,1}+breakpoint{i+1,1})/2);
+end
+
+midpointwithr = [midpiontofbreak rdec];
+rposition =  find(sort(midpointwithr) == rdec);
+groupstructure = breakpoint{rposition,2};
+lengthofgroup = length(groupstructure);
+if lengthofgroup == 1
+    d =  groupstructure;
+else 
+    d = 2;
+    for i = 1:1:lengthofgroup 
+        d =  lcm(groupstructure(i),d);
+    end
+end
+
+measurebitnumber = log2(groupstructure);
+
+% if lengthofgroup == 1
+%     y_dec = bin2dec(num2str(y(1:measurebitnumber(1))));
+% else
+%     y_dec(1) =  bin2dec(num2str(y(1:measurebitnumber(1))));
+%     setpointofy = measurebitnumber(1);
+%     for i = 1:1:lengthofgroup-1
+%         y_dec(i+1) =  bin2dec(num2str(y(setpointofy:setpointofy+measurebitnumber(i+1))));
+%         setpointofy = setpointofy + measurebitnumber(i+1);
+%     end
+% end
+
+%%%%%caculate the sum of linear equation set%%%%%%%
+
+lengthofsdistribution = length(sdistribution);
+positionofsdistribution = [1:1:lengthofsdistribution]-1;
+positionofsdistribution = positionofsdistribution';
+binofsdistribution = dec2bin(positionofsdistribution,n);
+[ssize_x,ssize_y] = size(binofsdistribution);
+
+if lengthofgroup == 1
+    for j = 1:1:ssize_x
+    s_dec(j,:) = bin2dec(binofsdistribution(j,1:measurebitnumber(1)));
+    end
+else
+    for j = 1:1:ssize_x
+    s_dec(j,1) =  bin2dec(binofsdistribution(1:measurebitnumber(1)));
+    setpointofs = measurebitnumber(1);
+    for i = 1:1:lengthofgroup-1
+        s_dec(j,i+1) =  bin2dec(binofsdistribution(j,setpointofs:setpointofs+measurebitnumber(i+1)));
+        setpointofs = setpointofs + measurebitnumber(i+1);
+    end
+    end
+end
+
+y_dec = s_dec;
+
+
+alpha = d./groupstructure;
+output = 0;
+for i = 1:1:2^n
+    output = output+ sum(mod(y_dec.*alpha*s_dec(i,:)',d).*bitprob*sdistribution(i));
+end
+
+
+
+
+
+end
+
+
+
+
+
+end
